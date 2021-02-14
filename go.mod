@@ -4,3 +4,5 @@ require (
 	github.com/99designs/gqlgen v0.13.0
 	github.com/vektah/gqlparser/v2 v2.1.0
 )
+
+module github.com/Salomon-Novachrono/graphQL-test
