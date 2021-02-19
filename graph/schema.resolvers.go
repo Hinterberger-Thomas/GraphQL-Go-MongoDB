@@ -6,25 +6,21 @@ package graph
 import (
 	"context"
 
+	"github.com/Salomon-Novachrono/graphQL-test/database"
 	"github.com/Salomon-Novachrono/graphQL-test/graph/generated"
 	"github.com/Salomon-Novachrono/graphQL-test/graph/model"
 )
 
 func (r *mutationResolver) CreateHuman(ctx context.Context, input model.NewHuman) (*model.Human, error) {
-	var user model.Human
-	user.ID = "hey"
-	user.Name = input.Name
-	return &user, nil
+	return db.InsertHumanById(input), nil
+}
+
+func (r *queryResolver) Human(ctx context.Context, id string) (*model.Human, error) {
+	return db.FindHumanById(id), nil
 }
 
 func (r *queryResolver) Humans(ctx context.Context) ([]*model.Human, error) {
-	var humans []*model.Human
-	human := model.Human{
-		ID:   "je",
-		Name: "john",
-	}
-	humans = append(humans, &human)
-	return humans, nil
+	return db.All(), nil
 }
 
 // Mutation returns generated.MutationResolver implementation.
@@ -35,3 +31,11 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+var db = database.Connect("mongodb://localhost:27017/")

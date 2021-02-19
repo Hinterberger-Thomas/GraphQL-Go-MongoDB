@@ -16,5 +16,6 @@ type Mutation{
 }
 
 type Query {
+  human(_id: String!): Human!
   humans: [Human!]!
 }
