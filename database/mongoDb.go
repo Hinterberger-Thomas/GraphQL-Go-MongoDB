@@ -7,6 +7,7 @@ import (
 
 	"github.com/Salomon-Novachrono/graphQL-test/graph/model"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -49,22 +50,27 @@ func (db *DB) InsertHumanById(human model.NewHuman) *model.Human {
 	humanColl := db.client.Database("graphQl-db").Collection("human")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	_, err := humanColl.InsertOne(ctx, bson.D{{Key: "name", Value: human.Name}})
+	inserg, err := humanColl.InsertOne(ctx, bson.D{{Key: "name", Value: human.Name}})
 	if err != nil {
 		log.Fatal(err)
 	}
-	returnHuman := model.Human{ID: "hey", Name: human.Name}
+	insertedId := inserg.InsertedID.(primitive.ObjectID).Hex()
+	returnHuman := model.Human{ID: insertedId, Name: human.Name}
 
 	return &returnHuman
 }
 
 func (db *DB) FindHumanById(id string) *model.Human {
+	ObjectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		log.Fatal(err)
+	}
 	humanColl := db.client.Database("graphQl-db").Collection("human")
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	res := humanColl.FindOne(ctx, id)
+	res := humanColl.FindOne(ctx, bson.M{"_id": ObjectID})
 
-	human := model.Human{}
+	human := model.Human{ID: id}
 
 	res.Decode(&human)
 
@@ -81,12 +87,13 @@ func (db *DB) All() []*model.Human {
 	}
 	var humans []*model.Human
 	for cur.Next(ctx) {
-		var human *model.Human
-		err := cur.Decode(&human)
+
+		sus, err := cur.Current.Elements()
+		human := model.Human{ID: sus[0].String(), Name: sus[1].String()}
 		if err != nil {
 			log.Fatal(err)
 		}
-		humans = append(humans, human)
+		humans = append(humans, &human)
 	}
 	return humans
 }
