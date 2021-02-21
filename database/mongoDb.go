@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -54,8 +55,8 @@ func (db *DB) InsertHumanById(human model.NewHuman) *model.Human {
 	if err != nil {
 		log.Fatal(err)
 	}
-	insertedId := inserg.InsertedID.(primitive.ObjectID).Hex()
-	returnHuman := model.Human{ID: insertedId, Name: human.Name}
+	insertedID := inserg.InsertedID.(primitive.ObjectID).Hex()
+	returnHuman := model.Human{ID: insertedID, Name: human.Name}
 
 	return &returnHuman
 }
@@ -89,10 +90,12 @@ func (db *DB) All() []*model.Human {
 	for cur.Next(ctx) {
 
 		sus, err := cur.Current.Elements()
-		human := model.Human{ID: sus[0].String(), Name: sus[1].String()}
+		fmt.Println(sus)
 		if err != nil {
 			log.Fatal(err)
 		}
+		human := model.Human{ID: (""), Name: ("")}
+
 		humans = append(humans, &human)
 	}
 	return humans
