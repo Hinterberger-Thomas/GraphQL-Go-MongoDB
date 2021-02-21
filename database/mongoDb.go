@@ -94,7 +94,7 @@ func (db *DB) All() []*model.Human {
 		if err != nil {
 			log.Fatal(err)
 		}
-		human := model.Human{ID: (""), Name: ("")}
+		human := model.Human{ID: (sus[0].String()), Name: (sus[1].String())}
 
 		humans = append(humans, &human)
 	}
